@@ -12,6 +12,7 @@ namespace Panacea.Modules.Relays
     {
         private readonly PanaceaServices _core;
         IRelayModule _blindsModule;
+        private IRelayModule _nurseModule;
 
         public RelayManager(PanaceaServices core)
         {
@@ -24,6 +25,12 @@ namespace Panacea.Modules.Relays
                 _core.PluginLoader.GetPlugins<IRelayModulePlugin>().First(p => p.GetType().Name == "FtdiPlugin").GetModuleAsync()
                     .ContinueWith(task => _blindsModule = task.Result);
             }
+            NurseCallAttached = _core.PluginLoader.GetPlugins<IRelayModulePlugin>().Any(p => p.GetType().Name == "SerialRelayPlugin");
+            if (NurseCallAttached)
+            {
+                _core.PluginLoader.GetPlugins<IRelayModulePlugin>().First(p => p.GetType().Name == "SerialRelayPlugin").GetModuleAsync()
+                    .ContinueWith(task => _nurseModule = task.Result);
+            }
         }
 
         private async void PluginLoader_PluginUnloaded(object sender, Modularity.IPlugin e)
@@ -33,7 +40,11 @@ namespace Panacea.Modules.Relays
             {
                 _blindsModule = await _core.PluginLoader.GetPlugins<IRelayModulePlugin>().First(p => p.GetType().Name == "FtdiPlugin").GetModuleAsync();
             }
-            //NurseCallAttached = _core.PluginLoader.GetPlugins<IRelayModulePlugin>().Any(p => p.GetType().Name == "FtdiPlugin");
+            NurseCallAttached = _core.PluginLoader.GetPlugins<IRelayModulePlugin>().Any(p => p.GetType().Name == "SerialRelayPlugin");
+            if (NurseCallAttached)
+            {
+                _nurseModule = await _core.PluginLoader.GetPlugins<IRelayModulePlugin>().First(p => p.GetType().Name == "SerialRelayPlugin").GetModuleAsync();
+            }
         }
 
         private async void PluginLoader_PluginLoaded(object sender, Modularity.IPlugin e)
@@ -43,7 +54,11 @@ namespace Panacea.Modules.Relays
             {
                 _blindsModule = await _core.PluginLoader.GetPlugins<IRelayModulePlugin>().First(p => p.GetType().Name == "FtdiPlugin").GetModuleAsync();
             }
-            //NurseCallAttached = _core.PluginLoader.GetPlugins<IRelayModulePlugin>().Any(p => p.GetType().Name == "FtdiPlugin");
+            NurseCallAttached = _core.PluginLoader.GetPlugins<IRelayModulePlugin>().Any(p => p.GetType().Name == "SerialRelayPlugin");
+            if (NurseCallAttached)
+            {
+                _nurseModule = await _core.PluginLoader.GetPlugins<IRelayModulePlugin>().First(p => p.GetType().Name == "SerialRelayPlugin").GetModuleAsync();
+            }
         }
 
         public bool BlindsAttached { get; set; }
@@ -62,7 +77,7 @@ namespace Panacea.Modules.Relays
 
         public Task<bool> SetNurseCallAsync(bool on)
         {
-            return Task.FromResult(true);
+            return _nurseModule.SetStatusAsync(on, 0);
         }
     }
 }
